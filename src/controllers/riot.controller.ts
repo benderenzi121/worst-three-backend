@@ -12,9 +12,12 @@ import { Response } from 'express';
 @Controller('riot')
 export class RiotController {
   constructor(private readonly RiotService: RiotService) {}
-  @Get()
-  async getSummonerInfo(@Res() res: Response): Promise<any> {
-    const data = await this.RiotService.getSummonerInfo();
+  @Get(':id')
+  async getSummonerInfo(
+    @Res() res: Response,
+    @Param('id') id: string,
+  ): Promise<any> {
+    const data = await this.RiotService.getSummonerInfo(id);
     res.status(HttpStatus.OK).json(data);
     return data;
   }
