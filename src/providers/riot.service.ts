@@ -44,6 +44,7 @@ export class RiotService {
       },
     );
     console.log(data);
-    return data.data;
+
+    return data.data.info.participants;
   }
 }
