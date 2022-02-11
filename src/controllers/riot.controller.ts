@@ -28,7 +28,7 @@ export class RiotController {
   }
   @Get('match-data/:matchId')
   async getMatchData(@Param('id') id: string): Promise<any> {
-    const data = await this.RiotService.getMatchData();
+    const data = await this.RiotService.getMatchData(id);
     return data;
   }
 }

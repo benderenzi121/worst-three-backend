@@ -1,5 +1,6 @@
 import { Body, Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { resourceLimits } from 'worker_threads';
 
 export class RiotService {
   async getSummonerInfo(summonerName = 'floppyman11'): Promise<any> {
@@ -8,7 +9,7 @@ export class RiotService {
       {
         headers: {
           Origin: 'https://developer.riotgames.com',
-          'X-Riot-Token': 'RGAPI-90812dcb-a8be-410b-8fe4-5c6351ecd101',
+          'X-Riot-Token': 'RGAPI-ed551021-8561-472d-bee0-a0a258ce4fd8',
         },
       },
     );
@@ -21,29 +22,42 @@ export class RiotService {
   ): Promise<any> {
     console.log('irun');
     const data = await axios.get(
-      `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=30`,
+      `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`,
       {
         headers: {
           Origin: 'https://developer.riotgames.com',
-          'X-Riot-Token': 'RGAPI-90812dcb-a8be-410b-8fe4-5c6351ecd101',
+          'X-Riot-Token': 'RGAPI-ed551021-8561-472d-bee0-a0a258ce4fd8',
         },
       },
     );
-    console.log(data);
-    return data.data;
+    let res = data.data.map(async (matchId: any) => {
+      const data = await this.getMatchData(matchId);
+      return data;
+    });
+    let gameResults = await Promise.all(res);
+
+    let arr = [];
+
+    gameResults.forEach((game) => {
+      game.forEach((summoner) => {
+        if (summoner.puuid == puuid) {
+          arr.push(summoner);
+        }
+      });
+    });
+    return arr;
   }
 
-  async getMatchData() {
+  async getMatchData(matchId) {
     const data = await axios.get(
-      `https://americas.api.riotgames.com/lol/match/v5/matches/NA1_4205559914`,
+      `https://americas.api.riotgames.com/lol/match/v5/matches/${matchId}`,
       {
         headers: {
           Origin: 'https://developer.riotgames.com',
-          'X-Riot-Token': 'RGAPI-90812dcb-a8be-410b-8fe4-5c6351ecd101',
+          'X-Riot-Token': 'RGAPI-ed551021-8561-472d-bee0-a0a258ce4fd8',
         },
       },
     );
-    console.log(data);
 
     return data.data.info.participants;
   }
